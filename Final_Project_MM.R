@@ -2,6 +2,9 @@ library(tidyverse)
 library(ggthemes)
 library(readr)
 library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(pheatmap)
 
 most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
 
@@ -18,8 +21,9 @@ invasive_data <- most_visited_nps_species_data %>%
   select(ParkName, CategoryName, Observations) %>% 
   group_by(ParkName, CategoryName) %>% 
   summarize(TotalObservations = sum(Observations, na.rm = TRUE)) %>% 
-  ungroup()
-
+  ungroup() %>% 
+  pivot_wider(names_from = ParkName, values_from = TotalObservations, values_fill = 0) %>% 
+  column_to_rownames("CategoryName")
 
 
 
