@@ -27,11 +27,16 @@ library(plotly)
 # endangered, threatened, extinct, 
 # proposed similarity of appearance (threatened), 
 # Experimental, nonessential populations of endangered species
-et_nn_species <- nps_species %>% 
-  filter(TEStatus %in% c("E", "T", "D3A", "PSAT", "E, EXPN") |
-           Nativeness == "Non-native")
 
-ggplot(et_nn_species, aes(x = ))
+et_species <- et_nn_species %>% 
+  filter(TEStatus %in% c("E", "T", "D3A", "PSAT", "E, EXPN")) %>% 
+  group_by(ParkName) %>% 
+  summarize(et_count = n())
+           
+nn_species <- et_nn_species %>% 
+  filter(Nativeness == "Non-native") %>% 
+  group_by(ParkName) %>% 
+  summarize(nn_count = n())
 
 
 
