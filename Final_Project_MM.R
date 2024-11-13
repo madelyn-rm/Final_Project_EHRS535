@@ -18,13 +18,25 @@ most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfo
 
 invasive_data <- most_visited_nps_species_data %>% 
   filter(Nativeness == "Non-native") %>% 
-  select(ParkName, CategoryName, Observations) %>% 
+  select(ParkName, CategoryName, References) %>% 
   group_by(ParkName, CategoryName) %>% 
-  summarize(TotalObservations = sum(Observations, na.rm = TRUE)) %>% 
+  summarize(TotalReferences = sum(References, na.rm = TRUE)) %>% 
   ungroup() %>% 
-  pivot_wider(names_from = ParkName, values_from = TotalObservations, values_fill = 0) %>% 
+  pivot_wider(names_from = ParkName, values_from = TotalReferences, values_fill = 0) %>% 
   column_to_rownames("CategoryName")
 
+log_transform_data <- log1p(as.matrix(invasive_data))
+
+# Generate the heatmap
+pheatmap(
+  as.matrix(log_transform_data),           
+  color = colorRampPalette(c("white", "red"))(50), 
+  border_color = NA,                 
+  main = "Invasive Species Observations by National Park and Category",
+  fontsize_row = 8,                 
+  fontsize_col = 8,                  
+  angle_col = 45                    
+)
 
 
 # 3. Graph that correlates how many threatened or endaged species there are and then
