@@ -9,5 +9,7 @@ most_visited_nps_species_data <- read_csv('https://raw.githubusercontent.com/rfo
 # 2. Heat map animals vs national parks 
 
 
-# 3. Graph that correlates how many threatened or endaged species there are and then
+# 3. Graph that correlates how many threatened or endangered species there are and then
 #how many non-native species there are
+library(plotly)
+
