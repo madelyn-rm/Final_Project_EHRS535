@@ -48,28 +48,31 @@ pheatmap(
 
 nps_species <- most_visited_nps_species_data
 library(plotly)
+library(viridis)
 
 # endangered, threatened, extinct, 
 # proposed similarity of appearance (threatened), 
 # Experimental, nonessential populations of endangered species
 
-et_species <- et_nn_species %>% 
+et_species <- nps_species %>% 
   filter(TEStatus %in% c("E", "T", "D3A", "PSAT", "E, EXPN")) %>% 
   group_by(ParkName) %>% 
   summarize(et_count = n())
            
-nn_species <- et_nn_species %>% 
+nn_species <- nps_species %>% 
   filter(Nativeness == "Non-native") %>% 
   group_by(ParkName) %>% 
   summarize(nn_count = n())
 
+et_nn_species <- et_species %>% 
+  full_join(nn_species, by = "ParkName")
+
+ggplot(et_nn_species, aes(x = et_count, y = nn_count, color = ParkName)) +
+  geom_point() +
+  scale_color_viridis(discrete = TRUE) +
+  theme_classic()
 
 
 
 
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 74450bd36230276d11ffd1e09f634f98eaa2fe6d
