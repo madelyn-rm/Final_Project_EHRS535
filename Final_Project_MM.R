@@ -50,6 +50,8 @@ nps_species <- most_visited_nps_species_data
 library(plotly)
 library(viridis)
 
+visits <- read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
+
 # endangered, threatened, extinct, 
 # proposed similarity of appearance (threatened), 
 # Experimental, nonessential populations of endangered species
@@ -66,6 +68,15 @@ nn_species <- nps_species %>%
 
 et_nn_species <- et_species %>% 
   full_join(nn_species, by = "ParkName")
+
+# editing visitor data
+
+visits %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "NP"),
+           sep = "NP")
+  
+# plotting
 
 ggplot(et_nn_species, aes(x = et_count, y = nn_count, color = ParkName)) +
   geom_point() +
