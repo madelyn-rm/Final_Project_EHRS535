@@ -71,14 +71,30 @@ et_nn_species <- et_species %>%
 
 # editing visitor data
 
-visits %>% 
+visits <- visits %>% 
   separate(col = ParkName,
            into = c("ParkName", "NP"),
-           sep = "NP")
+           sep = "NP") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  select(ParkName, RecreationVisits) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName)) %>% 
+  group_by(ParkName) %>% 
+  nest() %>% 
+  mutate(avg_visits = map(data, .f = sum)) %>% 
+  unnest() %>% 
+  mutate(avg_visits = avg_visits/45) %>% # 45--number of years per park surveyed
+  select(ParkName, avg_visits)
+  
+# merging the visits and nps datasets
+
+et_nn_species <- et_nn_species %>% 
+  full_join(visits, by = "ParkName")
   
 # plotting
 
-ggplot(et_nn_species, aes(x = et_count, y = nn_count, color = ParkName)) +
+ggplot(et_nn_species, aes(x = et_count, y = nn_count, size = avg_visits)) +
   geom_point() +
   scale_color_viridis(discrete = TRUE) +
   theme_classic()
