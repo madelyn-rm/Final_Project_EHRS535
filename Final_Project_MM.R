@@ -49,9 +49,11 @@ pheatmap(
 nps_species <- most_visited_nps_species_data
 library(plotly)
 library(viridis)
+library(readxl)
 
 visits <- read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
 regions <-  read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
+acres <- read_xlsx("data/NPS-Acreage-03-31-2024.xlsx", skip = 1)
 
 # endangered, threatened, extinct, 
 # proposed similarity of appearance (threatened), 
@@ -99,8 +101,11 @@ regions <- regions %>%
   select(ParkName, Region) %>% 
   filter(ParkName %in% unique(nps_species$ParkName)) %>% 
   group_by(Region, ParkName) %>% 
-  count() %>% 
-  select(ParkName, Region)
+  count()
+
+# acreage data
+
+acres %>% 
 
 
 # merging the visits, regions, and nps datasets
@@ -108,12 +113,13 @@ regions <- regions %>%
 et_nn_species <- et_nn_species %>% 
   full_join(visits, by = "ParkName") 
 
-et_nn_species %>% 
+et_nn_species <- et_nn_species %>% 
   full_join(regions, by = "ParkName")
   
 # plotting
 
-ggplot(et_nn_species, aes(x = et_count, y = nn_count, size = avg_visits)) +
+ggplot(et_nn_species, aes(x = et_count, y = nn_count, size = avg_visits,
+                          color = Region)) +
   geom_point() +
   scale_color_viridis(discrete = TRUE) +
   theme_classic()
