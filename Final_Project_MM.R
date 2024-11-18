@@ -164,15 +164,16 @@ et_nn_species <- et_nn_species %>%
 et_nn_species <- et_nn_species %>% 
   full_join(acres, by = "ParkName")
 
-# merging the visits and nps datasets
-
-et_nn_species <- et_nn_species %>% 
-  full_join(visits, by = "ParkName")
+# making it so there's only one row per park
+et_nn_species_single <- et_nn_species %>% 
+  select(ParkName, et_count, nn_count, avg_visits, Region, area) %>% 
+  group_by(ParkName, et_count, nn_count, avg_visits, Region, area) %>% 
+  count()
   
 # plotting
 
-ggplot(et_nn_species, aes(x = et_count, y = nn_count, size = avg_visits,
-                          color = Region)) +
+ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, size = avg_visits,
+                          alpha = log10(area), color = Region)) +
   geom_point() +
   scale_color_viridis(discrete = TRUE) +
   theme_classic()
