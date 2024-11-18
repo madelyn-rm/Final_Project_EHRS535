@@ -50,21 +50,56 @@ pheatmap(
 
 nps_species <- most_visited_nps_species_data
 library(plotly)
+library(viridis)
+
+visits <- read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
 
 # endangered, threatened, extinct, 
 # proposed similarity of appearance (threatened), 
 # Experimental, nonessential populations of endangered species
 
-et_species <- et_nn_species %>% 
+et_species <- nps_species %>% 
   filter(TEStatus %in% c("E", "T", "D3A", "PSAT", "E, EXPN")) %>% 
   group_by(ParkName) %>% 
   summarize(et_count = n())
            
-nn_species <- et_nn_species %>% 
+nn_species <- nps_species %>% 
   filter(Nativeness == "Non-native") %>% 
   group_by(ParkName) %>% 
   summarize(nn_count = n())
 
+et_nn_species <- et_species %>% 
+  full_join(nn_species, by = "ParkName")
+
+# editing visitor data
+
+visits <- visits %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "NP"),
+           sep = "NP") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  select(ParkName, RecreationVisits) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName)) %>% 
+  group_by(ParkName) %>% 
+  nest() %>% 
+  mutate(avg_visits = map(data, .f = sum)) %>% 
+  unnest() %>% 
+  mutate(avg_visits = avg_visits/45) %>% # 45--number of years per park surveyed
+  select(ParkName, avg_visits)
+  
+# merging the visits and nps datasets
+
+et_nn_species <- et_nn_species %>% 
+  full_join(visits, by = "ParkName")
+  
+# plotting
+
+ggplot(et_nn_species, aes(x = et_count, y = nn_count, size = avg_visits)) +
+  geom_point() +
+  scale_color_viridis(discrete = TRUE) +
+  theme_classic()
 
 
 
