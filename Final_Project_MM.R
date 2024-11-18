@@ -105,8 +105,27 @@ regions <- regions %>%
 
 # acreage data
 
-acres %>% 
+acres <- acres %>% 
+  select(`Area Name`, `Gross Area Acres`) %>% 
+  filter(str_detect(`Area Name`, pattern = "NP")) %>% 
+  rename(ParkName = `Area Name`, 
+         area = `Gross Area Acres`) %>% 
+  mutate(ParkName = str_to_title(ParkName)) %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "Np"),
+           sep = "Np") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName) |
+           str_detect(ParkName, "Smoky") |
+           str_detect(ParkName, "Rocky")) %>% 
+  select(ParkName, area)
 
+acres$ParkName <- replace(acres$ParkName, 7, 
+                          "Great Smoky Mountains National Park")
+acres$ParkName <- replace(acres$ParkName, 12, 
+                          "Rocky Mountain National Park")
 
 # merging the visits, regions, and nps datasets
 
