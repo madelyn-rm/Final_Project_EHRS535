@@ -5,6 +5,7 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(pheatmap)
+library(viridis)
 
 most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
 
@@ -14,34 +15,58 @@ most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfo
 
 
 # 2. Heat map invasive species vs national parks 
-#x-axis will be national parks, y-axis will be kingdom (category name)
-#maybe use geom tile or geom raster?? could organize from largest to smallest. 
-#Do I want my viewer to be able to see that none are invasive? Do I want a list of invasive species when hovering over?
-
-invasive_data <- most_visited_nps_species_data %>% 
-
-  filter(Nativeness == "Non-native") %>% 
-  select(ParkName, CategoryName, References) %>% 
-  group_by(ParkName, CategoryName) %>% 
-  summarize(TotalReferences = sum(References, na.rm = TRUE)) %>% 
-  ungroup() %>% 
-  pivot_wider(names_from = ParkName, values_from = TotalReferences, values_fill = 0) %>% 
-  column_to_rownames("CategoryName")
-
-log_transform_data <- log1p(as.matrix(invasive_data))
 
 
-pheatmap(
-  as.matrix(log_transform_data),           
-  color = colorRampPalette(c("white", "red"))(50), 
-  border_color = NA,                 
-  main = "Invasive Species References by National Park and Category",
-  fontsize_row = 8,                 
-  fontsize_col = 8,                  
-  angle_col = 45                    
+# Preparing the data
+invasive_data <- most_visited_nps_species_data %>%
+  filter(Nativeness == "Non-native") %>%
+  filter(!(CategoryName %in% c("Crab/Lobster/Shrimp", "Spider/Scorpion", "Protozoa"))) %>%  # Excluding categories with no observations
+  select(ParkName, CategoryName, References) %>%
+  group_by(ParkName, CategoryName) %>%
+  summarize(TotalReferences = sum(References, na.rm = TRUE), .groups = 'drop')
+
+# Some National Parks don't have data for certain categories
+# Creating a complete dataset with all combinations of ParkName and CategoryName
+all_combinations <- expand_grid(
+  ParkName = unique(invasive_data$ParkName),
+  CategoryName = unique(invasive_data$CategoryName)
 )
 
-  select(ParkName, CategoryName, Nativeness, Observations)
+# Merging with the existing data and filling missing combinations with 0 so that it can be colored
+invasive_data <- all_combinations %>%
+  left_join(invasive_data, by = c("ParkName", "CategoryName")) %>%
+  mutate(TotalReferences = replace_na(TotalReferences, 0))  # Replace NAs with 0
+
+# Calculating total references by category to sort by density of observations
+category_totals <- invasive_data %>%
+  group_by(CategoryName) %>%
+  summarize(TotalReferences = sum(TotalReferences, na.rm = TRUE)) %>%
+  arrange(desc(TotalReferences))  # Sort by total references
+
+# Reorder categories based on density
+invasive_data <- invasive_data %>%
+  mutate(CategoryName = factor(CategoryName, levels = rev(category_totals$CategoryName))) 
+
+# Plot using geom_raster with viridis color palette
+ggplot(invasive_data, aes(x = ParkName, y = CategoryName, fill = log1p(TotalReferences))) +
+  geom_raster() +
+  scale_fill_viridis_c(
+    option = "rocket",
+    direction = -1,  # Reverse the palette for clarity
+    name = "Documented References\n(Log Scale)"
+  ) +
+  labs(
+    title = "Distribution of Invasive Species Across National Parks",
+    x = "National Park",
+    y = "Category"
+  ) +
+  theme_tufte() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+    plot.title = element_text(hjust = 0.5),  # Center the title
+    panel.grid = element_blank()  # Remove grid lines
+  )
+
 
 
 # 3. Graph that correlates how many threatened or endangered species there are and then
@@ -53,7 +78,6 @@ library(plotly)
 library(viridis)
 
 visits <- read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
-regions <-  read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
 
 # endangered, threatened, extinct, 
 # proposed similarity of appearance (threatened), 
@@ -81,7 +105,7 @@ visits <- visits %>%
   mutate(ParkName = str_trim(ParkName),
          NP = "National Park") %>% 
   mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
-  select(ParkName,RecreationVisits) %>% 
+  select(ParkName, RecreationVisits) %>% 
   filter(ParkName %in% unique(nps_species$ParkName)) %>% 
   group_by(ParkName) %>% 
   nest() %>% 
@@ -90,28 +114,10 @@ visits <- visits %>%
   mutate(avg_visits = avg_visits/45) %>% # 45--number of years per park surveyed
   select(ParkName, avg_visits)
   
-# regions data 
-regions <- regions %>% 
-  separate(col = ParkName,
-           into = c("ParkName", "NP"),
-           sep = "NP") %>% 
-  mutate(ParkName = str_trim(ParkName),
-         NP = "National Park") %>% 
-  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
-  select(ParkName, Region) %>% 
-  filter(ParkName %in% unique(nps_species$ParkName)) %>% 
-  group_by(Region, ParkName) %>% 
-  count() %>% 
-  select(ParkName, Region)
-
-
-# merging the visits, regions, and nps datasets
+# merging the visits and nps datasets
 
 et_nn_species <- et_nn_species %>% 
-  full_join(visits, by = "ParkName") 
-
-et_nn_species %>% 
-  full_join(regions, by = "ParkName")
+  full_join(visits, by = "ParkName")
   
 # plotting
 
