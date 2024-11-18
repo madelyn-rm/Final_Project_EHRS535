@@ -53,6 +53,7 @@ library(plotly)
 library(viridis)
 
 visits <- read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
+regions <-  read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
 
 # endangered, threatened, extinct, 
 # proposed similarity of appearance (threatened), 
@@ -80,7 +81,7 @@ visits <- visits %>%
   mutate(ParkName = str_trim(ParkName),
          NP = "National Park") %>% 
   mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
-  select(ParkName, RecreationVisits) %>% 
+  select(ParkName,RecreationVisits) %>% 
   filter(ParkName %in% unique(nps_species$ParkName)) %>% 
   group_by(ParkName) %>% 
   nest() %>% 
@@ -89,10 +90,28 @@ visits <- visits %>%
   mutate(avg_visits = avg_visits/45) %>% # 45--number of years per park surveyed
   select(ParkName, avg_visits)
   
-# merging the visits and nps datasets
+# regions data 
+regions <- regions %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "NP"),
+           sep = "NP") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  select(ParkName, Region) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName)) %>% 
+  group_by(Region, ParkName) %>% 
+  count() %>% 
+  select(ParkName, Region)
+
+
+# merging the visits, regions, and nps datasets
 
 et_nn_species <- et_nn_species %>% 
-  full_join(visits, by = "ParkName")
+  full_join(visits, by = "ParkName") 
+
+et_nn_species %>% 
+  full_join(regions, by = "ParkName")
   
 # plotting
 
