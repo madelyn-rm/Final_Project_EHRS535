@@ -15,6 +15,8 @@ most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfo
 
 # 2. Heat map invasive species vs national parks 
 #x-axis will be national parks, y-axis will be kingdom (category name)
+#maybe use geom tile or geom raster?? could organize from largest to smallest. 
+#Do I want my viewer to be able to see that none are invasive? Do I want a list of invasive species when hovering over?
 
 invasive_data <- most_visited_nps_species_data %>% 
 
