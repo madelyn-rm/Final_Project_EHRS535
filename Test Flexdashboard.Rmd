@@ -35,7 +35,7 @@ Look at invasive species across the united states top 15 most visited national p
 
 
 
-Column {data-width=250}
+Column {data-width=300}
 -----------------------------------------------------------------------
 
 ### Heat Map 
@@ -46,7 +46,7 @@ Column {data-width=250}
 
 ### Chart C
 
-```{r}
+```{r fig.width= 10}
 # 2. Heat map invasive species vs national parks 
 #x-axis will be national parks, y-axis will be kingdom (category name)
 # Preparing the data
