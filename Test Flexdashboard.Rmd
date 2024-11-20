@@ -41,6 +41,12 @@ Column {data-width=250}
 ### Heat Map 
 
 ```{r}
+
+```
+
+### Chart C
+
+```{r}
 # 2. Heat map invasive species vs national parks 
 #x-axis will be national parks, y-axis will be kingdom (category name)
 # Preparing the data
@@ -102,14 +108,11 @@ heatmap <- ggplot(invasive_data, aes(
   )
 
 # Convert ggplot to plotly so that it is interactive
-interactive_plot <- ggplotly(heatmap, tooltip = c("x", "y", "text"))
-print(interactive_plot)
+#interactive_plot <- ggplotly(heatmap, tooltip = c("x", "y", "text"))
+print(heatmap)
 
-```
 
-### Chart C
 
-```{r}
 
 ```
 
