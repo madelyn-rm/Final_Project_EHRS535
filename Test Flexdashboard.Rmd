@@ -91,7 +91,7 @@ heatmap <- ggplot(invasive_data, aes(
   scale_fill_viridis_c(
     option = "rocket",
     direction = -1,  # Reverse the palette for clarity
-    name = "Documented References\n(Log Scale)"
+    name = "Documented\nReferences\n(Log Scale)"
   ) +
   labs(
     title = "Distribution of Invasive Species Across National Parks",
