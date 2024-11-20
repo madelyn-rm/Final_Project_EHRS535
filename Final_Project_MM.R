@@ -22,6 +22,7 @@ invasive_data <- most_visited_nps_species_data %>%
   filter(Nativeness == "Non-native") %>%
   filter(!(CategoryName %in% c("Crab/Lobster/Shrimp", "Spider/Scorpion", "Protozoa"))) %>%  # Excluding categories with no observations
   select(ParkName, CategoryName, References) %>%
+  mutate(ParkName = str_remove(ParkName, " National Park$")) %>%  # Remove "National Park" at the end of the name
   group_by(ParkName, CategoryName) %>%
   summarize(TotalReferences = sum(References, na.rm = TRUE), .groups = 'drop')
 
@@ -58,12 +59,14 @@ ggplot(invasive_data, aes(x = ParkName, y = CategoryName, fill = log1p(TotalRefe
   labs(
     title = "Distribution of Invasive Species Across National Parks",
     x = "National Park",
-    y = "Category"
+    y = ""
   ) +
   theme_tufte() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
-    plot.title = element_text(hjust = 0.5),  # Center the title
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 12),  # Rotate and increase size of x-axis labels
+    axis.text.y = element_text(size = 12),  # Increase size of y-axis labels
+    plot.title = element_text(hjust = 0.5, size = 14),  # Center and enlarge title
+    axis.title.x = element_text(size = 14),  # Increase size of x-axis title
     panel.grid = element_blank()  # Remove grid lines
   )
 
