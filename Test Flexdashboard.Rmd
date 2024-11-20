@@ -16,7 +16,6 @@ library(tidyr)
 library(pheatmap)
 library(viridis)
 
-
 most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
 
 
@@ -25,7 +24,11 @@ most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfo
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Chart A
+
+
+
+
+### Head Map
 
 ```{r}
 # 2. Heat map invasive species vs national parks 
@@ -85,7 +88,7 @@ ggplot(invasive_data, aes(x = ParkName, y = CategoryName, fill = log1p(TotalRefe
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart B
+### Heat Map
 
 ```{r}
 
