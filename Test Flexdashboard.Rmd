@@ -101,14 +101,14 @@ heatmap <- ggplot(invasive_data, aes(
     axis.title.x = element_text(size = 14),  # Increase size of x-axis title
     panel.grid = element_blank()  # Remove grid lines
   )
-<<<<<<< HEAD
-=======
 
 
 # Convert ggplot to plotly so that it is interactive
 interactive_plot <- ggplotly(heatmap, tooltip = c("x", "y", "text"))
 print(interactive_plot)
 ```
+
+
 
 Column {data-width=350}
 -----------------------------------------------------------------------
