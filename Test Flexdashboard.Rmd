@@ -15,31 +15,30 @@ library(ggplot2)
 library(tidyr)
 library(pheatmap)
 library(viridis)
+library(plotly)
 
 most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
 
-
 ```
 
-Column {data-width=150}
+Column {data-width=400}
 -----------------------------------------------------------------------
 ### Invasive Species in the Top 15 National Parks
- test 
+Look at invasive species across the united states top 15 most visited national parks
 
 
-Column {data-width=650}
------------------------------------------------------------------------
-
-### 
+### Big map 
 
 ```{r}
 
 ```
 
-Column {data-width=350}
+
+
+Column {data-width=250}
 -----------------------------------------------------------------------
 
-### Heat Map
+### Heat Map 
 
 ```{r}
 # 2. Heat map invasive species vs national parks 
@@ -102,21 +101,9 @@ heatmap <- ggplot(invasive_data, aes(
     panel.grid = element_blank()  # Remove grid lines
   )
 
-
 # Convert ggplot to plotly so that it is interactive
 interactive_plot <- ggplotly(heatmap, tooltip = c("x", "y", "text"))
 print(interactive_plot)
-```
-
-
-
-Column {data-width=350}
------------------------------------------------------------------------
-
-### Chart B
-
-```{r}
->>>>>>> da2bc8e19ba87ca05c3fcff5d735c4bb0b1a1a78
 
 ```
 
