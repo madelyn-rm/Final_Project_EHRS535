@@ -79,8 +79,11 @@ ggplot(invasive_data, aes(x = ParkName, y = CategoryName, fill = log1p(TotalRefe
 nps_species <- most_visited_nps_species_data
 library(plotly)
 library(viridis)
+library(readxl)
 
 visits <- read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
+regions <-  read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
+acres <- read_xlsx("data/NPS-Acreage-03-31-2024.xlsx", skip = 1)
 
 # endangered, threatened, extinct, 
 # proposed similarity of appearance (threatened), 
@@ -117,14 +120,63 @@ visits <- visits %>%
   mutate(avg_visits = avg_visits/45) %>% # 45--number of years per park surveyed
   select(ParkName, avg_visits)
   
-# merging the visits and nps datasets
+# regions data 
+regions <- regions %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "NP"),
+           sep = "NP") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  select(ParkName, Region) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName)) %>% 
+  group_by(Region, ParkName) %>% 
+  count()
+
+# acreage data
+acres <- acres %>% 
+  select(`Area Name`, `Gross Area Acres`) %>% 
+  filter(str_detect(`Area Name`, pattern = "NP")) %>% 
+  rename(ParkName = `Area Name`, 
+         area = `Gross Area Acres`) %>% 
+  mutate(ParkName = str_to_title(ParkName)) %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "Np"),
+           sep = "Np") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName) |
+           str_detect(ParkName, "Smoky") |
+           str_detect(ParkName, "Rocky")) %>% 
+  select(ParkName, area)
+
+acres$ParkName <- replace(acres$ParkName, 7, 
+                          "Great Smoky Mountains National Park")
+acres$ParkName <- replace(acres$ParkName, 12, 
+                          "Rocky Mountain National Park")
+
+# merging the visits, regions, and nps datasets
 
 et_nn_species <- et_nn_species %>% 
-  full_join(visits, by = "ParkName")
+  full_join(visits, by = "ParkName") 
+
+et_nn_species <- et_nn_species %>% 
+  full_join(regions, by = "ParkName")
+
+et_nn_species <- et_nn_species %>% 
+  full_join(acres, by = "ParkName")
+
+# making it so there's only one row per park
+et_nn_species_single <- et_nn_species %>% 
+  select(ParkName, et_count, nn_count, avg_visits, Region, area) %>% 
+  group_by(ParkName, et_count, nn_count, avg_visits, Region, area) %>% 
+  count()
   
 # plotting
 
-ggplot(et_nn_species, aes(x = et_count, y = nn_count, size = avg_visits)) +
+ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, size = avg_visits,
+                          alpha = log10(area), color = Region)) +
   geom_point() +
   scale_color_viridis(discrete = TRUE) +
   theme_classic()
