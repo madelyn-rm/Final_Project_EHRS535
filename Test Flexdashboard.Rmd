@@ -104,6 +104,8 @@ heatmap <- ggplot(invasive_data, aes(
     axis.text.y = element_text(size = 30),  # Increase size of y-axis labels
     plot.title = element_text(hjust = 0.5, size = 37),  # Center and enlarge title
     axis.title.x = element_text(size = 30),  # Increase size of x-axis title
+    legend.text = element_text(size = 30),  # Increase size of legend text
+    legend.title = element_text(size = 30),  # Increase size of legend title
     panel.grid = element_blank()  # Remove grid lines
   )
 
