@@ -6,6 +6,7 @@ library(ggplot2)
 library(tidyr)
 library(pheatmap)
 library(viridis)
+library(plotly)
 
 most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
 
@@ -48,8 +49,13 @@ category_totals <- invasive_data %>%
 invasive_data <- invasive_data %>%
   mutate(CategoryName = factor(CategoryName, levels = rev(category_totals$CategoryName))) 
 
-# Plot using geom_raster with viridis color palette
-ggplot(invasive_data, aes(x = ParkName, y = CategoryName, fill = log1p(TotalReferences))) +
+# Plot using geom_raster with viridis color palette and use original TotalReferences in hover text
+heatmap <- ggplot(invasive_data, aes(
+  x = ParkName,
+  y = CategoryName,
+  fill = log1p(TotalReferences),
+  text = paste("Total References:", TotalReferences)
+)) +
   geom_raster() +
   scale_fill_viridis_c(
     option = "rocket",
@@ -65,12 +71,15 @@ ggplot(invasive_data, aes(x = ParkName, y = CategoryName, fill = log1p(TotalRefe
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, size = 12),  # Rotate and increase size of x-axis labels
     axis.text.y = element_text(size = 12),  # Increase size of y-axis labels
-    plot.title = element_text(hjust = 0.5, size = 14),  # Center and enlarge title
+    plot.title = element_text(hjust = 0.5, size = 16),  # Center and enlarge title
     axis.title.x = element_text(size = 14),  # Increase size of x-axis title
     panel.grid = element_blank()  # Remove grid lines
   )
 
 
+# Convert ggplot to plotly so that it is interactive
+interactive_plot <- ggplotly(heatmap, tooltip = c("x", "y", "text"))
+print(interactive_plot)
 
 # 3. Graph that correlates how many threatened or endangered species there are and then
 # how many non-native species there are. Size of points is size of national park,
