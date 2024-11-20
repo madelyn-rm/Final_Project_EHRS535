@@ -21,14 +21,25 @@ most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfo
 
 ```
 
+Column {data-width=150}
+-----------------------------------------------------------------------
+### Invasive Species in the Top 15 National Parks
+
+
+
 Column {data-width=650}
 -----------------------------------------------------------------------
 
+### 
 
+```{r}
 
+```
 
+Column {data-width=350}
+-----------------------------------------------------------------------
 
-### Head Map
+### Heat Map
 
 ```{r}
 # 2. Heat map invasive species vs national parks 
@@ -85,14 +96,6 @@ ggplot(invasive_data, aes(x = ParkName, y = CategoryName, fill = log1p(TotalRefe
     axis.title.x = element_text(size = 14),  # Increase size of x-axis title
     panel.grid = element_blank()  # Remove grid lines
   )
-```
-
-Column {data-width=350}
------------------------------------------------------------------------
-
-### Heat Map
-
-```{r}
 
 ```
 
