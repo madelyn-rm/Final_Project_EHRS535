@@ -16,7 +16,7 @@ library(tidyr)
 library(pheatmap)
 library(viridis)
 library(plotly)
-
+library(readxl)
 most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
 
 ```
@@ -38,13 +38,125 @@ Look at invasive species across the united states top 15 most visited national p
 Column {data-width=300}
 -----------------------------------------------------------------------
 
-### Heat Map 
+### Correlating Biodiversity, Non-Native Influence, and Visitor Impact Across National Parks
 
-```{r}
+```{r fig.width= 13, fig.height= 12, warning=FALSE}
+
+visits <- read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
+regions <-  read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
+acres <- read_xlsx("data/NPS-Acreage-03-31-2024.xlsx", skip = 1)
+
+# endangered, threatened, extinct, 
+# proposed similarity of appearance (threatened), 
+# Experimental, nonessential populations of endangered species
+nps_species <- most_visited_nps_species_data
+et_species <- nps_species %>% 
+  filter(TEStatus %in% c("E", "T", "D3A", "PSAT", "E, EXPN")) %>% 
+  group_by(ParkName) %>% 
+  summarize(et_count = n())
+           
+nn_species <- nps_species %>% 
+  filter(Nativeness == "Non-native") %>% 
+  group_by(ParkName) %>% 
+  summarize(nn_count = n())
+
+et_nn_species <- et_species %>% 
+  full_join(nn_species, by = "ParkName")
+
+# editing visitor data
+
+visits <- visits %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "NP"),
+           sep = "NP") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  select(ParkName, RecreationVisits) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName)) %>% 
+  group_by(ParkName) %>% 
+  nest() %>% 
+  mutate(avg_visits = map(data, .f = sum)) %>% 
+  unnest() %>% 
+  mutate(avg_visits = avg_visits/45) %>% # 45--number of years per park surveyed
+  select(ParkName, avg_visits)
+  
+# regions data 
+regions <- regions %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "NP"),
+           sep = "NP") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  select(ParkName, Region) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName)) %>% 
+  group_by(Region, ParkName) %>% 
+  count()
+
+# acreage data
+acres <- acres %>% 
+  select(`Area Name`, `Gross Area Acres`) %>% 
+  filter(str_detect(`Area Name`, pattern = "NP")) %>% 
+  rename(ParkName = `Area Name`, 
+         area = `Gross Area Acres`) %>% 
+  mutate(ParkName = str_to_title(ParkName)) %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "Np"),
+           sep = "Np") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName) |
+           str_detect(ParkName, "Smoky") |
+           str_detect(ParkName, "Rocky")) %>% 
+  select(ParkName, area)
+
+acres$ParkName <- replace(acres$ParkName, 7, 
+                          "Great Smoky Mountains National Park")
+acres$ParkName <- replace(acres$ParkName, 12, 
+                          "Rocky Mountain National Park")
+
+# merging the visits, regions, and nps datasets
+
+et_nn_species <- et_nn_species %>% 
+  full_join(visits, by = "ParkName") 
+
+et_nn_species <- et_nn_species %>% 
+  full_join(regions, by = "ParkName")
+
+et_nn_species <- et_nn_species %>% 
+  full_join(acres, by = "ParkName")
+
+# making it so there's only one row per park
+et_nn_species_single <- et_nn_species %>% 
+  select(ParkName, et_count, nn_count, avg_visits, Region, area) %>% 
+  group_by(ParkName, et_count, nn_count, avg_visits, Region, area) %>% 
+  count()
+  
+# plotting
+
+ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, size = avg_visits,
+                          alpha = log10(area), color = Region)) +
+  geom_point() +
+  scale_color_viridis(discrete = TRUE) +
+  theme_classic()+
+  labs(
+    title = "Non-Native Species and Visitor Impact",
+    x = "Endangered/Threatened/Extinct Count",
+    y = "Non-Native Count")+
+  theme(
+    axis.text.x = element_text(size = 15),  # Rotate and increase size of x-axis labels
+    axis.text.y = element_text(size = 15),  # Increase size of y-axis labels
+    plot.title = element_text(hjust = 0.5, size = 30),  # Center and enlarge title
+    axis.title.x = element_text(size = 25),
+    axis.title.y = element_text(size = 25),# Increase size of x-axis title
+    legend.text = element_text(size = 20),  # Increase size of legend text
+    legend.title = element_text(size = 20))
 
 ```
 
-### Chart C
+### Mapping the Spread of Invasive Species Across National Parks
 
 ```{r fig.width= 15, fig.height= 10}
 # 2. Heat map invasive species vs national parks 
