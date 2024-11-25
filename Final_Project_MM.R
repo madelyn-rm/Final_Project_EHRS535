@@ -10,6 +10,10 @@ library(plotly)
 
 most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
 
+name_lists<- unique(most_visited_nps_species_data$ParkName) %>% 
+print()
+
+
 
 
 # 1. Map of invasive animals  
@@ -188,7 +192,8 @@ ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, size = avg_visits,
                           alpha = log10(area), color = Region)) +
   geom_point() +
   scale_color_viridis(discrete = TRUE) +
-  theme_classic()
+  theme_classic()+
+  
 
 
 
