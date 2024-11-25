@@ -189,11 +189,16 @@ et_nn_species_single <- et_nn_species %>%
 # plotting
 
 ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, size = avg_visits,
-                          alpha = log10(area), color = Region)) +
+                           color = log10(area))) +
   geom_point() +
+<<<<<<< HEAD
   scale_color_viridis(discrete = TRUE) +
   theme_classic()+
   
+=======
+  scale_color_viridis(discrete = FALSE) +
+  theme_classic()
+>>>>>>> 806b8a685eeaf09fe30b3ed427bbcd1908652018
 
 
 
