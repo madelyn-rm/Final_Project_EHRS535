@@ -93,6 +93,7 @@ nps_species <- most_visited_nps_species_data
 library(plotly)
 library(viridis)
 library(readxl)
+library(scales)
 
 visits <- read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
 regions <-  read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
@@ -188,18 +189,30 @@ et_nn_species_single <- et_nn_species %>%
   
 # plotting
 
-ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, size = avg_visits,
-                           color = log10(area))) +
+the_plot <- ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, 
+                            size = avg_visits, color = log10(area))) +
   geom_point() +
-  scale_color_viridis(discrete = TRUE) +
+  viridis::scale_color_viridis(discrete = FALSE) +
+  scale_size_continuous(
+    name = "Number of Visitors\nPer Year",
+    breaks = c(2e6, 3e6, 5e6, 8e6),
+    labels = c("2x10^6", "3x10^6", "5x10^6", "8x10^6")) +
   theme_classic() +
-  scale_color_viridis(discrete = FALSE) +
-  theme_classic() +
-  labs(x = "Endangered Species", y = "Non-Native Species", 
-       size = "Average Visits\nPer Year", color = "log10(Area)")
+  labs(x = "Number of Endangered Species", y = "Number of Non-Native Species", 
+       color = "log10(Area)", 
+       title = "Number of Non-Native and Endangered Species by Park") +
+  guides(size = guide_legend())
 
+plotly_plot <- ggplotly(the_plot)
 
-
+plot_ly(et_nn_species_single, x = ~et_count, y = ~nn_count, size = ~avg_visits,
+        color = ~log10(area),
+        text = ~paste("Park: ", ParkName, 
+                      "<br>Avg. Visitors: ", signif(avg_visits, digits = 4),
+                      "<br>Region: ", Region),
+        layout(title = "Manually Specified Labels", 
+               plot_bgcolor = "#e5ecf6", 
+               xaxis = list(title = "Endangered and Threatened Species")))
 
 
 
