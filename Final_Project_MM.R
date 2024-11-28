@@ -209,10 +209,10 @@ plot_ly(et_nn_species_single, x = ~et_count, y = ~nn_count, size = ~avg_visits,
         color = ~log10(area),
         text = ~paste("Park: ", ParkName, 
                       "<br>Avg. Visitors: ", signif(avg_visits, digits = 4),
-                      "<br>Region: ", Region),
+                      "<br>Region: ", Region)) %>% 
         layout(title = "Manually Specified Labels", 
-               plot_bgcolor = "#e5ecf6", 
-               xaxis = list(title = "Endangered and Threatened Species")))
+               plot_bgcolor = "lightblue1", 
+               xaxis = list(title = "Endangered and Threatened Species"))
 
 
 
