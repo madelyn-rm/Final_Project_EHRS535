@@ -189,21 +189,19 @@ et_nn_species_single <- et_nn_species %>%
   
 # plotting
 
-the_plot <- ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, 
-                            size = avg_visits, color = log10(area))) +
-  geom_point() +
-  viridis::scale_color_viridis(discrete = FALSE) +
-  scale_size_continuous(
-    name = "Number of Visitors\nPer Year",
-    breaks = c(2e6, 3e6, 5e6, 8e6),
-    labels = c("2x10^6", "3x10^6", "5x10^6", "8x10^6")) +
-  theme_classic() +
-  labs(x = "Number of Endangered Species", y = "Number of Non-Native Species", 
-       color = "log10(Area)", 
-       title = "Number of Non-Native and Endangered Species by Park") +
-  guides(size = guide_legend())
-
-plotly_plot <- ggplotly(the_plot)
+#the_plot <- ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, 
+                           # size = avg_visits, color = log10(area))) +
+ # geom_point() +
+  #viridis::scale_color_viridis(discrete = FALSE) +
+  #scale_size_continuous(
+   # name = "Number of Visitors\nPer Year",
+   # breaks = c(2e6, 3e6, 5e6, 8e6),
+   # labels = c("2x10^6", "3x10^6", "5x10^6", "8x10^6")) +
+ # theme_classic() +
+ # labs(x = "Number of Endangered Species", y = "Number of Non-Native Species", 
+     #  color = "log10(Area)", 
+      # title = "Number of Non-Native and Endangered Species by Park") +
+ # guides(size = guide_legend())
 
 plot_ly(et_nn_species_single, x = ~et_count, y = ~nn_count, size = ~avg_visits,
         color = ~log10(area),
