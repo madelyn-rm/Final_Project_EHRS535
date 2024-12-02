@@ -122,7 +122,9 @@ server <- function(input, output, session) {
       arrange(desc(References)) %>%
       head(10) %>%
       select(CommonNames, References, Observations) %>%
-      mutate(CommonNames = str_split(CommonNames, ",", simplify = TRUE)[, 1])
+      mutate(
+        CommonNames = str_split(CommonNames, ",", simplify = TRUE)[, 1],
+        CommonNames = str_to_title(CommonNames))
   })
 }
 
