@@ -124,9 +124,12 @@ server <- function(input, output, session) {
       select(CommonNames, References, Observations) %>%
       mutate(
         CommonNames = str_split(CommonNames, ",", simplify = TRUE)[, 1],
-        CommonNames = str_to_title(CommonNames))
+        CommonNames = str_to_title(CommonNames),
+        References = as.integer(References),
+        Observations = as.integer(Observations))
   })
 }
+
 
 # Run the app
 shinyApp(ui, server)
