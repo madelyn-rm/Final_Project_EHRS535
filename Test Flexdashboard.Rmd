@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
+    theme: cerulean
 ---
 
 ```{r setup, include=FALSE}
