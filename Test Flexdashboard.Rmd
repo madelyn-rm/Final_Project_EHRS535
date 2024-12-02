@@ -5,6 +5,7 @@ output:
     orientation: columns
     vertical_layout: fill
     theme: cerulean
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -19,6 +20,8 @@ library(viridis)
 library(plotly)
 library(readxl)
 library(scales)
+library(shiny)
+library(leaflet)
 
 most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
 
@@ -33,10 +36,7 @@ Look at invasive species across the united states top 15 most visited national p
 ### Big map 
 
 ```{r fig.height= 500}
-library(shiny)
-library(leaflet)
-library(readr)
-library(dplyr)
+
 
 most_visited_nps_species_data <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv')
 
