@@ -21,27 +21,53 @@ The parks in this analysis include:
 14. Yosemite National Park 
 15. Zion National Park
 
-The flexboard illustrates three plots that look at various aspects of the National park species data. The plots include a heat map depicting invasive species and their distribution across parks,and a plot showing the correlation of non-native species, and visitor impact across National parks emphasizing the ecological and anthropogenic factors affecting national parks,
-
-Additional information
-
-Plot 1:
+Plot 1: National Parks Non-native Species Explorer
 
 
-Plot 2:
+Plot 2: Correlating Biodiversity, Non-Native Influence, and Visitor Impact Across National Parks
 This plot
-[Park visit data](https://www.responsible-datasets-in-context.com/posts/np-data/)
-[Park regions data]()
 
 
-Plot 3:
+Addtional Data used: [Park visit and regions data](https://www.responsible-datasets-in-context.com/posts/np-data/)
+
+
+
+Plot 3: Mapping the Spread of Invasive Species Across National Parks
 
 
 
 Installation:
 
+# Data Manipulation
+library(dplyr)
+library(data.table)
+library(tidyr)
+
+# Data Visualization
+library(ggplot2)
+library(plotly)
+library(flexdashboard)
+
+# Working with APIs
+library(httr)
+library(jsonlite)
+
+# Geospatial Data
+library(sf)
+library(tigris)
+
+# Simulation and Statistical Analysis
+library(purrr)
+library(stringr)
+
+# Interactive Elements
+library(shiny)
+
+
 
  
+ 
+ what file to knit to run the program 
 
 
 
