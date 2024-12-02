@@ -34,43 +34,30 @@ Addtional Data used: [Park visit and regions data](https://www.responsible-datas
 
 Plot 3: Mapping the Spread of Invasive Species Across National Parks
 
-
-
 Installation:
 
-# Data Manipulation
-library(dplyr)
-library(data.table)
-library(tidyr)
+```
 
-# Data Visualization
-library(ggplot2)
-library(plotly)
-library(flexdashboard)
+# Core Data Manipulation and Visualization
+library(tidyverse)  # Includes ggplot2, dplyr, tidyr, etc.
+library(ggplot2)    # Visualization
+library(ggthemes)   # Thematic enhancements for ggplot2
+library(tidyr)      # Data tidying and reshaping
 
-# Working with APIs
-library(httr)
-library(jsonlite)
+# Advanced Visualizations
+library(pheatmap)   # Heatmap generation
+library(viridis)    # Color scales for ggplot2 and other plots
+library(plotly)     # Interactive visualizations
 
-# Geospatial Data
-library(sf)
-library(tigris)
+# Data Input and Scaling
+library(readxl)     # Reading Excel files
+library(scales)     # Scaling functions for plots
 
-# Simulation and Statistical Analysis
-library(purrr)
-library(stringr)
+# Interactive Dashboards
+library(shiny)      # Interactive web applications
+library(leaflet)    # Interactive maps
 
-# Interactive Elements
-library(shiny)
-
-
-
- 
- 
- what file to knit to run the program 
-
-
-
+```
 
 
 
