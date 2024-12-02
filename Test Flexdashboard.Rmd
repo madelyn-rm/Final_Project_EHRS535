@@ -258,7 +258,7 @@ plot_ly(et_nn_species_single, x = ~et_count, y = ~nn_count, size = ~avg_visits,
                       "<br><b>Avg. Visitors:</b> ", 
                       signif(avg_visits/1000, digits = 4), "k",
                       "<br><b>Region:</b> ", Region)) %>% 
-        layout(title = "Non-Native vs. Endangered and Threatened Species", 
+        layout( 
                plot_bgcolor = "lightblue1", 
                xaxis = list(title = "Number of Endangered and Threatened Species"),
                yaxis = list(title = "Number of Non-Native Species"))
@@ -320,11 +320,9 @@ heatmap <- ggplot(invasive_data, aes(
     name = "Documented\nReferences\n(Log Scale)"
   ) +
   labs(
-    title = "Distribution of Invasive Species Across National Parks",
     x = "National Park",
     y = ""
   ) +
-  theme_tufte() +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, size = 30),  # Rotate and increase size of x-axis labels
     axis.text.y = element_text(size = 30),  # Increase size of y-axis labels
