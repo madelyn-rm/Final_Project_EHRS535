@@ -332,8 +332,9 @@ heatmap <- ggplot(invasive_data, aes(
   )
 
 # Convert ggplot to plotly so that it is interactive
-#interactive_plot <- ggplotly(heatmap, tooltip = c("x", "y", "text"))
-print(heatmap)
+interactive_plot <- ggplotly(heatmap, tooltip = c("x", "y", "text"))
+
+interactive_plot
 
 ```
 
