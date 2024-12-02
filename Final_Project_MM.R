@@ -205,10 +205,10 @@ et_nn_species_single <- et_nn_species %>%
 
 plot_ly(et_nn_species_single, x = ~et_count, y = ~nn_count, size = ~avg_visits,
         color = ~log10(area),
-        text = ~paste("Park: ", ParkName, 
-                      "<br>Avg. Visitors: ", 
+        text = ~paste("<b>Park:</b> ", ParkName, 
+                      "<br><b>Avg. Visitors:</b> ", 
                       signif(avg_visits/1000, digits = 4), "k",
-                      "<br>Region: ", Region)) %>% 
+                      "<br><b>Region:</b> ", Region)) %>% 
         layout(title = "Non-Native vs. Endangered and Threatened Species", 
                plot_bgcolor = "lightblue1", 
                xaxis = list(title = "Number of Endangered and Threatened Species"),
