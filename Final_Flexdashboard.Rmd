@@ -1,0 +1,341 @@
+---
+title: "Group Project ERHS 535 : Invasive Species in the Top 15 National Parks"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: cerulean
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggthemes)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(pheatmap)
+library(viridis)
+library(plotly)
+library(readxl)
+library(scales)
+library(shiny)
+library(leaflet)
+
+most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
+
+```
+
+Column {data-width=100}
+-----------------------------------------------------------------------
+### Invasive Species in the Top 15 National Parks
+
+The flexboard illustrates three plots that look at various aspects of the National park species data. The large plot is an interactive explorer of National Parks that depicts the top 10 non-native species. The top right plot shows the correlation of non-native species, and visitor impact across National parks emphasizing the ecological and anthropogenic factors affecting national parks. The bottom left include a heat map depicting invasive species and their distribution across parks. 
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+### National Parks Non-native Species Explorer
+
+```{r fig.height= 500}
+
+
+most_visited_nps_species_data <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv')
+
+nps <- most_visited_nps_species_data
+
+
+# National parks data: names and coordinates
+parks_data <- data.frame(
+  ParkName = c(
+    "Acadia National Park", "Bryce Canyon National Park", 
+    "Cuyahoga Valley National Park", "Glacier National Park",
+    "Grand Canyon National Park", "Grand Teton National Park",
+    "Great Smoky Mountains National Park", "Hot Springs National Park",
+    "Indiana Dunes National Park", "Joshua Tree National Park",
+    "Olympic National Park", "Rocky Mountain National Park",
+    "Yellowstone National Park", "Yosemite National Park",
+    "Zion National Park"
+  ),
+  lat = c(
+    44.35, 37.593, 41.24, 48.696, 36.107, 43.79,
+    35.653, 34.513, 41.653, 33.873, 47.803, 40.342,
+    44.428, 37.865, 37.298
+  ),
+  lng = c(
+    -68.21, -112.17, -81.55, -113.718, -112.113, -110.705,
+    -83.507, -93.054, -87.112, -115.9, -123.704, -105.683,
+    -110.588, -119.538, -113.026
+  )
+)
+
+nps_with_coord <- nps %>%
+  inner_join(parks_data, by = "ParkName")
+
+# Shiny app UI
+ui <- fluidPage(
+  titlePanel("National Parks Non-native Species Explorer"),
+  sidebarLayout(
+    sidebarPanel(
+      h4("Selected Park:"),
+      textOutput("selected_park"),
+      tableOutput("top_species_table")  # Display the top 10 table
+    ),
+    mainPanel(
+      leafletOutput("map", height = 600)
+    )
+  )
+)
+
+# Shiny app server
+server <- function(input, output, session) {
+  # Reactive value to store the selected park
+  selected_park <- reactiveVal(NULL)
+  
+  # Render the map
+  output$map <- renderLeaflet({
+    leaflet(data = nps_with_coord %>% distinct(ParkName, lat, lng)) %>%
+      addProviderTiles(providers$Esri.WorldImagery) %>%
+      addMarkers(
+        ~lng, ~lat,
+        popup = ~ParkName,
+        layerId = ~ParkName  # Set layer ID for park selection
+      )
+  })
+  
+  # Capture marker click and update the selected park
+  observeEvent(input$map_marker_click, {
+    selected_park(input$map_marker_click$id)
+  })
+  
+  # Update the selected park name in the UI
+  output$selected_park <- renderText({
+    selected_park() %||% "Click on a marker to select a park."
+  })
+  
+  # Filter and display top 10 Non-native species for the selected park
+  output$top_species_table <- renderTable({
+    req(selected_park())  # Ensure a park is selected
+    
+    nps_with_coord %>%
+      filter(ParkName == selected_park(), Nativeness == "Non-native") %>%
+      arrange(desc(References)) %>%
+      head(10) %>%
+      select(CommonNames, References, Observations) %>%
+      mutate(CommonNames = str_split(CommonNames, ",", simplify = TRUE)[, 1])
+  })
+}
+
+# Run the app
+shinyApp(ui, server)
+
+```
+
+
+Column {data-width=300}
+-----------------------------------------------------------------------
+
+### Correlating Biodiversity, Non-Native Influence, and Visitor Impact Across National Parks
+
+```{r fig.width= 13, fig.height= 12, warning=FALSE}
+
+nps_species <- most_visited_nps_species_data
+
+visits <- read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
+regions <-  read_csv("https://raw.githubusercontent.com/melaniewalsh/responsible-datasets-in-context/main/datasets/national-parks/US-National-Parks_RecreationVisits_1979-2023.csv")
+acres <- read_xlsx("data/NPS-Acreage-03-31-2024.xlsx", skip = 1)
+
+# endangered, threatened, extinct, 
+# proposed similarity of appearance (threatened), 
+# Experimental, nonessential populations of endangered species
+
+et_species <- nps_species %>% 
+  filter(TEStatus %in% c("E", "T", "D3A", "PSAT", "E, EXPN")) %>% 
+  group_by(ParkName) %>% 
+  summarize(et_count = n())
+           
+nn_species <- nps_species %>% 
+  filter(Nativeness == "Non-native") %>% 
+  group_by(ParkName) %>% 
+  summarize(nn_count = n())
+
+et_nn_species <- et_species %>% 
+  full_join(nn_species, by = "ParkName")
+
+# editing visitor data
+
+visits <- visits %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "NP"),
+           sep = "NP") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  select(ParkName, RecreationVisits) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName)) %>% 
+  group_by(ParkName) %>% 
+  nest() %>% 
+  mutate(avg_visits = map(data, .f = sum)) %>% 
+  unnest() %>% 
+  mutate(avg_visits = avg_visits/45) %>% # 45--number of years per park surveyed
+  select(ParkName, avg_visits)
+  
+# regions data 
+regions <- regions %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "NP"),
+           sep = "NP") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  select(ParkName, Region) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName)) %>% 
+  group_by(Region, ParkName) %>% 
+  count()
+
+# acreage data
+acres <- acres %>% 
+  select(`Area Name`, `Gross Area Acres`) %>% 
+  filter(str_detect(`Area Name`, pattern = "NP")) %>% 
+  rename(ParkName = `Area Name`, 
+         area = `Gross Area Acres`) %>% 
+  mutate(ParkName = str_to_title(ParkName)) %>% 
+  separate(col = ParkName,
+           into = c("ParkName", "Np"),
+           sep = "Np") %>% 
+  mutate(ParkName = str_trim(ParkName),
+         NP = "National Park") %>% 
+  mutate(ParkName = paste(ParkName, NP, sep = " ")) %>% 
+  filter(ParkName %in% unique(nps_species$ParkName) |
+           str_detect(ParkName, "Smoky") |
+           str_detect(ParkName, "Rocky")) %>% 
+  select(ParkName, area)
+
+acres$ParkName <- replace(acres$ParkName, 7, 
+                          "Great Smoky Mountains National Park")
+acres$ParkName <- replace(acres$ParkName, 12, 
+                          "Rocky Mountain National Park")
+
+# merging the visits, regions, and nps datasets
+
+et_nn_species <- et_nn_species %>% 
+  full_join(visits, by = "ParkName") 
+
+et_nn_species <- et_nn_species %>% 
+  full_join(regions, by = "ParkName")
+
+et_nn_species <- et_nn_species %>% 
+  full_join(acres, by = "ParkName")
+
+# making it so there's only one row per park
+et_nn_species_single <- et_nn_species %>% 
+  select(ParkName, et_count, nn_count, avg_visits, Region, area) %>% 
+  group_by(ParkName, et_count, nn_count, avg_visits, Region, area) %>% 
+  count()
+  
+# plotting
+
+#the_plot <- ggplot(et_nn_species_single, aes(x = et_count, y = nn_count, 
+                           # size = avg_visits, color = log10(area))) +
+ # geom_point() +
+  #viridis::scale_color_viridis(discrete = FALSE) +
+  #scale_size_continuous(
+   # name = "Number of Visitors\nPer Year",
+   # breaks = c(2e6, 3e6, 5e6, 8e6),
+   # labels = c("2x10^6", "3x10^6", "5x10^6", "8x10^6")) +
+ # theme_classic() +
+ # labs(x = "Number of Endangered Species", y = "Number of Non-Native Species", 
+     #  color = "log10(Area)", 
+      # title = "Number of Non-Native and Endangered Species by Park") +
+ # guides(size = guide_legend())
+
+plot_ly(et_nn_species_single, x = ~et_count, y = ~nn_count, size = ~avg_visits,
+        color = ~log10(area),
+        text = ~paste("<b>Park:</b>", ParkName, 
+                      "<br><b>Avg. Visitors:</b> ", 
+                      signif(avg_visits/1000, digits = 4), "k",
+                      "<br><b>Region:</b> ", Region)) %>% 
+        layout(title = "Non-Native vs. Endangered and Threatened Species", 
+               plot_bgcolor = "lightblue1", 
+               xaxis = list(title = "Number of Endangered and Threatened Species"),
+               yaxis = list(title = "Number of Non-Native Species"))
+
+
+
+
+
+
+```
+
+### Mapping the Spread of Invasive Species Across National Parks
+
+```{r fig.width= 15, fig.height= 10}
+# 2. Heat map invasive species vs national parks 
+#x-axis will be national parks, y-axis will be kingdom (category name)
+# Preparing the data
+invasive_data <- most_visited_nps_species_data %>%
+  filter(Nativeness == "Non-native") %>%
+  filter(!(CategoryName %in% c("Crab/Lobster/Shrimp", "Spider/Scorpion", "Protozoa"))) %>%  # Excluding categories with no observations
+  select(ParkName, CategoryName, References) %>%
+  mutate(ParkName = str_remove(ParkName, " National Park$")) %>%  # Remove "National Park" at the end of the name
+  group_by(ParkName, CategoryName) %>%
+  summarize(TotalReferences = sum(References, na.rm = TRUE), .groups = 'drop')
+
+# Some National Parks don't have data for certain categories
+# Creating a complete dataset with all combinations of ParkName and CategoryName
+all_combinations <- expand_grid(
+  ParkName = unique(invasive_data$ParkName),
+  CategoryName = unique(invasive_data$CategoryName)
+)
+
+# Merging with the existing data and filling missing combinations with 0 so that it can be colored
+invasive_data <- all_combinations %>%
+  left_join(invasive_data, by = c("ParkName", "CategoryName")) %>%
+  mutate(TotalReferences = replace_na(TotalReferences, 0))  # Replace NAs with 0
+
+# Calculating total references by category to sort by density of observations
+category_totals <- invasive_data %>%
+  group_by(CategoryName) %>%
+  summarize(TotalReferences = sum(TotalReferences, na.rm = TRUE)) %>%
+  arrange(desc(TotalReferences))  # Sort by total references
+
+# Reorder categories based on density
+invasive_data <- invasive_data %>%
+  mutate(CategoryName = factor(CategoryName, levels = rev(category_totals$CategoryName))) 
+
+# Plot using geom_raster with viridis color palette and use original TotalReferences in hover text
+heatmap <- ggplot(invasive_data, aes(
+  x = ParkName,
+  y = CategoryName,
+  fill = log1p(TotalReferences),
+  text = paste("Total References:", TotalReferences)
+)) +
+  geom_raster() +
+  scale_fill_viridis_c(
+    option = "rocket",
+    direction = -1,  # Reverse the palette for clarity
+    name = "Documented\nReferences\n(Log Scale)"
+  ) +
+  labs(
+    title = "Distribution of Invasive Species Across National Parks",
+    x = "National Park",
+    y = ""
+  ) +
+  theme_tufte() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 30),  # Rotate and increase size of x-axis labels
+    axis.text.y = element_text(size = 30),  # Increase size of y-axis labels
+    plot.title = element_text(hjust = 0.5, size = 37),  # Center and enlarge title
+    axis.title.x = element_text(size = 30),  # Increase size of x-axis title
+    legend.text = element_text(size = 30),  # Increase size of legend text
+    legend.title = element_text(size = 30),  # Increase size of legend title
+    panel.grid = element_blank()  # Remove grid lines
+  )
+
+# Convert ggplot to plotly so that it is interactive
+#interactive_plot <- ggplotly(heatmap, tooltip = c("x", "y", "text"))
+
+print(heatmap)
+
+```
+

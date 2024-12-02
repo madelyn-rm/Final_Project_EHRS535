@@ -5,6 +5,7 @@ output:
     orientation: columns
     vertical_layout: fill
     theme: cerulean
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -19,24 +20,25 @@ library(viridis)
 library(plotly)
 library(readxl)
 library(scales)
+library(shiny)
+library(leaflet)
 
 most_visited_nps_species_data <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv")
 
 ```
 
-Column {data-width=400}
+Column {data-width=100}
 -----------------------------------------------------------------------
 ### Invasive Species in the Top 15 National Parks
-Look at invasive species across the united states top 15 most visited national parks
 
+The flexboard illustrates three plots that look at various aspects of the National park species data. The large plot is an interactive explorer of National Parks that depicts the top 10 non-native species. The top right plot shows the correlation of non-native species, and visitor impact across National parks emphasizing the ecological and anthropogenic factors affecting national parks. The bottom left include a heat map depicting invasive species and their distribution across parks. 
 
-### Big map 
+Column {data-width=400}
+-----------------------------------------------------------------------
+### National Parks Non-native Species Explorer
 
 ```{r fig.height= 500}
-library(shiny)
-library(leaflet)
-library(readr)
-library(dplyr)
+
 
 most_visited_nps_species_data <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv')
 
