@@ -36,14 +36,12 @@ Plot 3: Mapping the Spread of Invasive Species Across National Parks
 
 Installation:
 
-```
-
+```{r}
 # Core Data Manipulation and Visualization
 library(tidyverse)  # Includes ggplot2, dplyr, tidyr, etc.
 library(ggplot2)    # Visualization
 library(ggthemes)   # Thematic enhancements for ggplot2
 library(tidyr)      # Data tidying and reshaping
-
 # Advanced Visualizations
 library(pheatmap)   # Heatmap generation
 library(viridis)    # Color scales for ggplot2 and other plots
