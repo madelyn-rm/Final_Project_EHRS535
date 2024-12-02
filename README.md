@@ -21,7 +21,7 @@ The parks in this analysis include:
 14. Yosemite National Park 
 15. Zion National Park
 
-The flexboard illustrates three plots that look at various aspects of the National park species data.The plots include a heat map depicting invasive species and their distribution across parks,and a plot showing the correlation of non-native species, and visitor impact across National parks emphasizing the ecological and anthropogenic factors affecting national parks,
+The flexboard illustrates three plots that look at various aspects of the National park species data. The plots include a heat map depicting invasive species and their distribution across parks,and a plot showing the correlation of non-native species, and visitor impact across National parks emphasizing the ecological and anthropogenic factors affecting national parks,
 
 Additional information
 
@@ -38,7 +38,11 @@ Plot 3:
 
 
 
-Installation 
+Installation:
+
+
+ 
+
 
 
 
@@ -46,9 +50,9 @@ Installation
 
 Acknowledgments:
 
-Plot 1:
-Plot 2: Laura
-Plot 3: Madelynm
+Plot 1: 
+Plot 2: Laura Moore 
+Plot 3: Madelyn 
 Flexboard set up and README: Danara Flores
 
 
