@@ -122,9 +122,16 @@ server <- function(input, output, session) {
       arrange(desc(References)) %>%
       head(10) %>%
       select(CommonNames, References, Observations) %>%
-      mutate(CommonNames = str_split(CommonNames, ",", simplify = TRUE)[, 1])
+      mutate(
+        CommonNames = str_split(CommonNames, ",", simplify = TRUE)[, 1],
+        CommonNames = str_to_title(CommonNames),
+        References = as.integer(References),
+        Observations = as.integer(Observations))
   })
 }
+
+
+
 
 # Run the app
 shinyApp(ui, server)
@@ -255,13 +262,9 @@ plot_ly(et_nn_species_single, x = ~et_count, y = ~nn_count, size = ~avg_visits,
                       "<br><b>Avg. Visitors:</b> ", 
                       signif(avg_visits/1000, digits = 4), "k",
                       "<br><b>Region:</b> ", Region)) %>% 
-<<<<<<< HEAD
         layout( 
                plot_bgcolor = "lightblue1", 
                xaxis = list(title = "Number of Endangered and Threatened Species"),
-=======
-        layout(xaxis = list(title = "Number of Endangered and Threatened Species"),
->>>>>>> e8e7e902b7a65f8fa177ce93ac38c1b5c9f28c36
                yaxis = list(title = "Number of Non-Native Species"))
 
 
