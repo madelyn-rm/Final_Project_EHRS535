@@ -22,7 +22,6 @@ The parks in this analysis include:
 ## Sourced Data
 These data for the analysis were sourced from the [Tidy Tuesday GitHub repository](https://github.com/rfordatascience/tidytuesday/tree/master/data/2024/2024-10-08). The data was collected by the [National Park Services ](https://irma.nps.gov/NPSpecies/Search/SpeciesList). The information in NPSpecies is available to the public for more detailed information on the dataset, here is the [Glossary](https://irma.nps.gov/content/npspecies/Help/docs/NPSpecies_User_Guide.pdf) for column names, field options, and tag meanings.  
 
-Additional data used: 
 Addtional Data used for plot 2: [Park visit and regions data](https://www.responsible-datasets-in-context.com/posts/np-data/)
 
 ## Plot 1: National Parks Non-native Species Explorer
