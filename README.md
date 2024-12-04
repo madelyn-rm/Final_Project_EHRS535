@@ -24,7 +24,7 @@ These data for the analysis were sourced from the [Tidy Tuesday GitHub repositor
 
 Addtional Data used for plot 2: 
 [Park visit and regions data](https://www.responsible-datasets-in-context.com/posts/np-data/)
-[Acres]()
+[Acres](https://www.nps.gov/subjects/lwcf/acreagereports.htm)
 
 ## Plot 1: National Parks Non-native Species Explorer
 The interactive plot features a map of the United States highlighting the locations of the 15 most visited National Parks. By clicking on the icon above a park, users can uncover the top 10 most frequently reported non-native species specific to that location, providing a way to explore and compare the impact of non-native species across these parks.

@@ -19,6 +19,98 @@ print()
 # 1. Map of invasive animals  
 
 
+most_visited_nps_species_data <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-10-08/most_visited_nps_species_data.csv')
+
+nps <- most_visited_nps_species_data
+
+
+# National parks data: names and coordinates
+parks_data <- data.frame(
+  ParkName = c(
+    "Acadia National Park", "Bryce Canyon National Park", 
+    "Cuyahoga Valley National Park", "Glacier National Park",
+    "Grand Canyon National Park", "Grand Teton National Park",
+    "Great Smoky Mountains National Park", "Hot Springs National Park",
+    "Indiana Dunes National Park", "Joshua Tree National Park",
+    "Olympic National Park", "Rocky Mountain National Park",
+    "Yellowstone National Park", "Yosemite National Park",
+    "Zion National Park"
+  ),
+  lat = c(
+    44.35, 37.593, 41.24, 48.696, 36.107, 43.79,
+    35.653, 34.513, 41.653, 33.873, 47.803, 40.342,
+    44.428, 37.865, 37.298
+  ),
+  lng = c(
+    -68.21, -112.17, -81.55, -113.718, -112.113, -110.705,
+    -83.507, -93.054, -87.112, -115.9, -123.704, -105.683,
+    -110.588, -119.538, -113.026
+  )
+)
+
+nps_with_coord <- nps %>%
+  inner_join(parks_data, by = "ParkName")
+
+# Shiny app UI
+ui <- fluidPage(
+  titlePanel("National Parks Non-native Species Explorer"),
+  sidebarLayout(
+    sidebarPanel(
+      h4("Selected Park:"),
+      textOutput("selected_park"),
+      tableOutput("top_species_table")  # Display the top 10 table
+    ),
+    mainPanel(
+      leafletOutput("map", height = 600)
+    )
+  )
+)
+
+# Shiny app server
+server <- function(input, output, session) {
+  # Reactive value to store the selected park
+  selected_park <- reactiveVal(NULL)
+  
+  # Render the map
+  output$map <- renderLeaflet({
+    leaflet(data = nps_with_coord %>% distinct(ParkName, lat, lng)) %>%
+      addProviderTiles(providers$Esri.WorldImagery) %>%
+      addMarkers(
+        ~lng, ~lat,
+        popup = ~ParkName,
+        layerId = ~ParkName  # Set layer ID for park selection
+      )
+  })
+  
+  # Capture marker click and update the selected park
+  observeEvent(input$map_marker_click, {
+    selected_park(input$map_marker_click$id)
+  })
+  
+  # Update the selected park name in the UI
+  output$selected_park <- renderText({
+    selected_park() %||% "Click on a marker to select a park."
+  })
+  
+  # Filter and display top 10 Non-native species for the selected park
+  output$top_species_table <- renderTable({
+    req(selected_park())  # Ensure a park is selected
+    
+    nps_with_coord %>%
+      filter(ParkName == selected_park(), Nativeness == "Non-native") %>%
+      arrange(desc(References)) %>%
+      head(10) %>%
+      select(CommonNames, References, Observations) %>%
+      mutate(
+        CommonNames = str_split(CommonNames, ",", simplify = TRUE)[, 1],
+        CommonNames = str_to_title(CommonNames))
+  })
+}
+
+# Run the app
+shinyApp(ui, server)
+
+
 # 2. Heat map invasive species vs national parks 
 
 
